@@ -5,9 +5,9 @@ This repository contains data, R scripts and associated outputs, and other mater
 ### GENERAL INFORMATION
 
 **Project Information**   
-Details for the Christina Lake research program [here](http://www.acmelab.ca/christinalake.html).
+The Christina Lake research area is a region of boreal forest northeast of Lac La Biche, Alberta Canada, and part of the Canadian Oil Sands. Our research began here in 2011 and ran for three years using remote trail cameras. Several years later, the Alberta government institued a lethal wolf removal program, offering a unique before and after comparison of mammal ecology following the removal of an apex predator from the ecosystem. Cameras were redeployed in 2017 as close as possible to the original sites, again running for three years. Further details for the Christina Lake research program provided [here](http://www.acmelab.ca/christinalake.html), but also see our published papers from this camera area in the relevant literature folder. 
 
-Also visit the [ACME website](http://www.acmelab.ca) more information about the ACME lab.
+Also visit the [ACME website](http://www.acmelab.ca) more information about the ACME lab and other related projects
 
 **Author Information (data):**  
  Principal Investigator Contact Information  
@@ -28,21 +28,20 @@ Also visit the [ACME website](http://www.acmelab.ca) more information about the 
 
 This folder contains both summarized and raw data data products (e.g. raw camera trap data csv files) used to produce key products in the outputs folder. 
 *Files in main folder*
-1) WillmoreSummer_alldata.csv : this is a binded file of the individual timelapse files from each camera site during the SUMMER study. The individual camera site csv files were unavailable
-2) WillmoreWinter_alldata.csv : this is a binded file of the individual timelapse files from each camera site during the WINTER study. The individual camera site csv files were unavailable
-3) SUMMER WILLMORE BIODIVERSITY SITE LOCATIONS CORRECTED 2017 : this file contains the location of each camera site (UTMs)
-4) WillmoreLandCoverAll.csv : this file contains natural landcover data for the proportion area of a circular buffer around each camera site. Grid codes keys from the original data extraction are provided in other/Wilmore_Griz_Land_Class_Key.jpeg
-5) WillmoreNDVI2008.csv : this file contains mean NDVI for each camera site in 2008
-6) WillmoreNDVI2012.csv : this file contains mean NDVI for each camera site in 2012
-7) WillmoreTRI.csv : this file contains mean TRI for each camera site
-8) WW_HumanFootprintCover_corrected.csv : human footpring cover for each camera site (details below)
+1) Boreal Deer Camera Station Check Data WITH LOSSES - 2015.csv : this is a messy file which contains the camera locations in the "pre" wolf control period. There is much information here on camera checks and other data, but all that is needed from this file is the camera locations. 
+2) christina_camera_locations.csv : camera locations from the "post" wolf control period
+3) Christina_covariates_prepost_250-5000_KBaillieDavid : Site covariates extracted at multiple spatial scales (250 - 5000m) for camera sites in the pre and post period. Covariates provided as percentage area within the circular buffer around each site. Further details on data below. 
+4) CLcameradata_Jan2019-Oct2019.csv : binded timelapse files featuring detections of wildlife from cameras from January 2019 to October 2019 (raw individual timelapse files
+5) CLcameradata_Oct2011-Oct2014.csv : binded timelapse files featuring detections of wildlife from cameras from October 2011 to October 2014
+6) CLcameradata_Oct2017-Jan2019.csv : binded timelapse files featuring detections of wildlife from cameras from October 2017 to January 2019
+7) CLcameradata_Oct2019-Oct2020.csv : binded timelapse files featuring detections of wildlife from cameras from October 2019 to October 2020
 
 **outputs**
 
-This folder contains the four key data products needed to move forward with additional analyses; 1) the raw detections recorded from cameras (including blank images, nothing has been filtered), 2) a summary of independent detections of wildlife species at each camera site to the standard 30 minute threshold, 3) the GPS locations of individual camera sites, and 4) covariates associated with each camera site extracted across multiple radius buffers (details below)
+This folder contains the four key data products needed to move forward with additional analyses; 1) the raw detections recorded from cameras, 2) a summary of independent detections of wildlife species at each camera site to the standard 30 minute threshold, 3) the GPS locations of individual camera sites, and 4) covariates associated with each camera site extracted across multiple radius buffers (details below)
 
 **relevant literature**  
-This folder provides pdf copies of previously published papers using the Willmore Wilderness remote camera dataset. The purpose of this folder is to provide background/information on previously published work using this dataset. Note that sample numbers may vary between individual manuscripts due to specifics of individual projects, as well as the multiple deployment designs within the Willmore dataset.
+This folder provides pdf copies of previously published papers using the Christina Lake remote camera dataset. The purpose of this folder is to provide background/information on previously published work using this dataset. Note that sample numbers may vary between individual manuscripts due to specifics of individual projects, as well as the multiple deployment designs within the Willmore dataset.
  * Baillie-David 2022 UVIC MSc Thesis - Examining shifts in boreal carnivore species' resource selection in response to predator control to conserve woodland caribou in western Canada
  * Barnas et al. 2024 How landscape traits affect boreal mammal responses to anthropogenic disturbance.
  * Burgar et al. 2018. The importance of considering multiple interacting species for conservation of
@@ -54,9 +53,9 @@ This folder provides pdf copies of previously published papers using the Willmor
  * Frey et al. 2022. Predator control alters wolf interactions with prey and competitor species over the diel cycle
  * Wittische et al. 2021 Community-level modelling of boreal forest mammal distribution in an oil sands landscape
 
-**other**  
+**metadata**  
 This folder contains information from the original data production necessary for producing key data products. 
-1) Wilmore_Griz_Land_Class_Key.jpeg : translation keys for landcover classes
+1) Landscape Data Preparation 2016-02-26.docx : additional information on the data extraction process for the landscape covariates from 2011-2015
 2) HFI2010_Metadata.pdf - detailed description of human feature index used in the data extraction process (see below)
 
 <hr>
