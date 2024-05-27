@@ -56,7 +56,8 @@ This folder provides pdf copies of previously published papers using the Christi
 **metadata**  
 This folder contains information from the original data production necessary for producing key data products. 
 1) Landscape Data Preparation 2016-02-26.docx : additional information on the data extraction process for the landscape covariates from 2011-2015
-2) HFI2010_Metadata.pdf - detailed description of human feature index used in the data extraction process (see below)
+2) HFI2010_Metadata.pdf - detailed description example of human feature index used in the data extraction process (see below)
+3) 2005-avi-abvegetation3-inventorystan-mar05.pdf : Alberta Vegetation Index
 
 <hr>
 
@@ -100,6 +101,7 @@ This folder contains information from the original data production necessary for
 * **Event.ID** : a unique identifier for a species' independent detection at a camera site. 
 
 ### Data specific information for : [outputs/christina_lake_covariates.csv]  
+For further details and specifics of individual columns/data sources, it is recommended to read the methods section of K. Baillie-David's MSc thesis in the relevant literature folder. This will provide users further details on the sources used. 
 
 * **Number of variables/columns:** 24
 * **Number of observations/rows:** 976 (115 camera sites, 20 repeat observations/one observation per radius measure)
@@ -123,51 +125,11 @@ This folder contains information from the original data production necessary for
 *  **cutblocks** : Areas where forestry operations have occurred (clearcut, selective harvest, salvage logging, etc.)
 *  **pipeline** : A line of underground and over ground pipes, of substantial length and capacity, used for the conveyance of petrochemicals. (Technically a summary feature, but basically the same, see page 167 of other/HFI2010_Metadata.pdf)
 *  **transmissionline** :A utility corridor >10 m wide with poles, towers and lines for transmitting high voltage electricity (voltage greater than 69 kV). (Technically a summary class, see page 112 of metadata/HFI2010_Metadata.pdf)
-*  **wellsite** :
+*  **wellsite** : wellsites (likely active)
 *  **blockfeatures** : other block features such as industrial sites (not including wellsites or forestry cutblocks)
 *  **road** : a summary feature of road types (see pages 38-39 of other/HFI2010_Metadata.pdf)
-*  **trail** :
+*  **trail** : a summary feature of recreational trails
 *  **seismic_3d** : 3D seismic lines
 *  **seismicline** : traditional seismic lines
-*  **
-*  **
 
-
-
-*  **bpsdl** : borrowpits, sump, dugouts and lagoons: Artificial holding or treatment ponds for industrial, agricultural or municipal wastewater. Human made water and sewage lagoons used for municipal purposes.
-*  **cultivation** : Agricultural areas used for cultivation
-*  **disturbedvegetation** : Disturbed vegetation that does not fit any other category of human footprint.
-*  **harvestareas** : Areas where forestry operations have occurred (clearcut, selective harvest, salvage logging, etc.)
-*  **industrial_sites** : a summary feature of many industrial sites (see pages 75-76 of other/HFI2010_Metadata.pdf)
-*  **landfill** : Large area of raised land, indicating buried garbage. Some landfills have evidence of surface revegetation and garbage dispersed throughout designated extent. They may also have large perimeter berns or fences
-*  **mine_sites** : a summary feature of many mine sites (see pages 60-61 of other/HFI2010_Metadata.pdf)
-*  **othervegsurfacesrecreation** : a summary feature of many other vegetated surfaces (see pages 97 of other/HFI2010_Metadata.pdf)
-*   **pipelines** : A line of underground and over ground pipes, of substantial length and capacity, used for the conveyance of petrochemicals. (Technically a summary feature, but basically the same, see page 167 of other/HFI2010_Metadata.pdf)
-*   **railways**: a summary feature of many railway types, see page 48 of other/HFI2010_Metadata.pdf)
-*   **resevoirs** : a body of water created by excavation or the man made damming of a river or stream
-*   **residential_areas** : Rural developments (10 - 100 buildings per quarter section).
-*   **roads** : a summary feature of road types (see pages 38-39 of other/HFI2010_Metadata.pdf)
-*   **seismiclines** : a summary feature of different seismic lines (see page 174 of other/HFI2010_Metadata.pdf)
-*   **transmissionlines** : A utility corridor >10 m wide with poles, towers and lines for transmitting high voltage electricity (voltage greater than 69 kV). (Technically a summary class, see page 112 of other/HFI2010_Metadata.pdf)
-*   **verge** : no clear description - RECOMMEND REMOVAL OR NOT USING
-*   **wellsites** : no clear description, but given there are two feature classes for active and abandoned wellsites, this is likely a combination of the two.
-*   **wind_gen_facilities** : Wind turbines, operational or former, visible on imagery. Digitized to represent original land disturbance from construction.
-*   **dense_conifer** : dense conifer
-*   **moderate_conifer** : moderate conifer cover
-*   **open_conifer** : open conifer cover
-*   **mixed** : likely mixed tree species cover
-*   **broadleaf** : deciduous tree cover
-*   **treed_wetland** : wetlands with a high amount of trees
-*   **shrub** : shrubs
-*   **herb** : not sure, herbs? maybe oregano? (being cheeky, I can't find anything on this)
-*   **open_wetland** : open wetlands lacking trees
-*   **barren** : open landscape devoid of vegetation
-*   **water** : open water, different from wetland.
-*   **shadow_or_no_data** : error in the extraction process from shadows
-*   **snow_or_ice** : snow or ice cover
-*   **regeneration** : regenerating vegetation
-*   **cloud_or_no_data** error in the extraction process from clouds
-*   **mean_ndvi_2008** : mean ndvi value within a 1000m buffer of the camera sites from 2008
-*   **mean_ndvi_2012** : mean ndvi value within a 1000m buffer of the camera sites from 2012
-*   **mean_tri** : mean terrain ruggedness index at each camera site
 
