@@ -103,8 +103,10 @@ This folder contains information from the original data production necessary for
 ### Data specific information for : [outputs/christina_lake_covariates.csv]  
 For further details and specifics of individual columns/data sources, it is recommended to read the methods section of K. Baillie-David's MSc thesis in the relevant literature folder. This will provide users further details on the sources used. 
 
+Note that all covariate values provided in this dataset are given as PERCENTAGE area of the circular buffer. 
+
 * **Number of variables/columns:** 24
-* **Number of observations/rows:** 976 (115 camera sites, 20 repeat observations/one observation per radius measure)
+* **Number of observations/rows:** 976 
 
 **Variable List:**
 * **treatment**: indicator for camera setup in the "pre" or "post" wolf control period
