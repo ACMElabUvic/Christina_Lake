@@ -1,0 +1,364 @@
+The purpose of this script is to organize the raw Christina Lake data and produce four main outputs 1) a file of raw detections, 2) a file of 30 minute independent detections, 3) a file of camera locations, and 4) a file of covariates for each site
+
+First load up the packages and the raw data files.
+```{r}
+library(reproducible) #setting up directories for data management
+library(readr)       #Needed to read and merge all the csv's in the camera folder
+library(dplyr)        #data wranglin'
+library(lubridate)    #datetime manipulation
+library(tidyr)        #more data manipulation
+library(stringr)      #detecting character strings
+library(ggplot2)      #data visualization
+
+#Clear everything out and start fresh ;)
+rm(list=ls())
+
+#This just sets up files for inputs (already created, must contain your files), and outputs
+input_directory<-reproducible::checkPath(file.path(getwd(), "inputs"), create = TRUE)
+output_directory<-reproducible::checkPath(file.path(getwd(), "outputs"), create = TRUE)
+
+#Read in the raw detection files, it looks like there are four separate files
+list.files(input_directory)
+#Pre-cull data - just the single file
+oct2011_oct2014<-read.csv(file.path(input_directory, "CLcameradata_Oct2011-Oct2014.csv"))
+#Post-cull data - in three different files
+oct2017_jan2019<-read.csv(file.path(input_directory, "CLcameradata_Oct2017-Jan2019.csv"))
+jan2019_oct2019<-read.csv(file.path(input_directory, "CLcameradata_Jan2019-Oct2019.csv"))
+oct2019_oct2020<-read.csv(file.path(input_directory, "CLcameradata_Oct2019-Oct2020.csv"))
+
+#Camera locations, these are coming from different files so some work will need to be done to fix these up
+#Read in the spatial data
+spatial_pre<-read.csv(file.path(input_directory, "Boreal Deer Camera Station Check Data WITH LOSSES - 2015.csv"),
+                            header = TRUE)
+
+
+spatial_post<-read.csv(file.path(input_directory, "christina_camera_locations.csv"),
+                            header = TRUE)
+
+
+```
+
+
+Cleaning up data, just making sure we can merge the files together into a clean format. Plenty of columns where names are slightly different between files, so some work needs doing here. 
+```{r}
+#The pre data is all in one file so we can quickly clean that up
+#Select the rows we want, and read in the Date and Time columns as a formal datetime 
+detections_pre <- oct2011_oct2014 %>%
+  dplyr::select(Date, Time, Site, Species, Total) %>%
+  mutate(Date.Time = paste(Date, Time,sep = " "),
+         Date.Time = as.POSIXct(Date.Time,format="%d/%m/%Y  %I:%M %p"),
+         Period = "pre",
+         Site = as.character(as.numeric(Site)),
+         Date = as.Date(Date, format = "%d/%m/%Y"))
+
+#Since the data for post cull years comes from three files, we need to merge them. But it looks like the columns are the same for two but different for one, so might have to deal separately
+colnames(oct2017_jan2019)
+colnames(jan2019_oct2019)
+colnames(oct2019_oct2020)
+
+#How many sites in each?
+n_distinct(detections_pre$Site)
+n_distinct(oct2017_jan2019$Site)
+n_distinct(oct2019_oct2020$Site)
+n_distinct(jan2019_oct2019$Site)
+
+
+#First merge the two files that match, and select the rows we want. 
+detections_2017_2019<- bind_rows(oct2017_jan2019, jan2019_oct2019)%>%
+  dplyr::select(Date, Time, Site, Species, Total) %>%
+  mutate(Site = as.character(as.numeric(Site)))
+
+#Now clean up the messy one, it even has a strange site name so that needs fixing
+detections_2019_2020<-oct2019_oct2020%>%
+  dplyr::select(Date, Time, Site, Species, Total) %>%
+  mutate(Site = as.character(as.numeric(str_remove(Site, "CL"))))
+
+#Now we need to make the date formats match for everyone
+detections_2017_2019$Date<-gsub("-17","-2017", as.character(detections_2017_2019$Date))
+
+#And now we can bind those three together since everyone matches
+detections_post <- bind_rows(detections_2017_2019, detections_2019_2020) %>%
+  mutate(Period = "post",
+         Date.Time = paste(Date, Time,sep = " "),
+         Date.Time = as.POSIXct(Date.Time,format="%d-%b-%Y %H:%M:%S"),
+         Date = as.Date(Date, format = "%d-%b-%Y"))
+
+#remove where site= NA, not exactly sure what these are meant to be. Perhaps an error?
+detections_post<-detections_post %>% 
+  filter(!(is.na(Site)))
+
+# Bind into single dataframe
+detections <- bind_rows(detections_pre, detections_post)
+
+# check NA date.times - dont know why they are not working... but using Nicoles trick to read those in proper and storing them in another dataframe
+bad_datetimes<-detections %>%
+  filter(is.na(Date.Time))%>%
+  mutate(Date.Time = ymd_hms(paste(as.character(Date), Time)))
+
+#Remove those observations from the main dataframe
+detections <- detections %>%
+  filter(!(is.na(Date.Time)))
+
+#Add the bad datetimes back in, sneaky but it works. 
+detections<-rbind(detections, bad_datetimes)
+
+#Output the cleaned detection file, this just saves some time if anyone wants the file already cleaned
+#write.csv(detections,file.path(output_directory,"raw_detections_complete.csv"), row.names = F)
+
+#Going to clean up our environment a bit, lots going on
+#This will remove everything except detections
+#rm(list=setdiff(ls(), c("detections", "input_directory", "output_directory")))
+
+#Now just confirming, how many sites do we have from the raw detection files?
+detections%>%
+  group_by(Period)%>%
+  summarise(n_sites = n_distinct(Site))
+
+```
+
+Cleaning up an extra site that we dont need
+```{r}
+#Ok so just clarifying one thing, there should be 62 sites pre and 60 sites post, but we have an extra one in the pre period. 
+
+#Ok so site number 64 is the extra, and not exactly sure why, but it does look like it was only active for a couple months in the pre. I guess to keep things the same we can just drop it?? This would match previously published manuscripts (e.g. Frey et al. 2022) which has 60 and 62 sites for each period
+detections<-detections%>%
+  filter(!(Site == "64" & Period  == "pre"))
+
+
+```
+
+Camera operability: We will figure out independent detections later, but first I want to know which months cameras were actually active for. It would be easy to say that cameras ran from October to October of each period (e.g. 3 years each), but what if cameras failed in the winter or summer before camera checks each year?
+```{r}
+
+#This approach does not account for camera checks each year in October. For example, see the first camera runs from october 24th 2017 to october 15th 2020. But cameras were checked each year in october, so if that camera failed in august 2018, we would have no way to know with this method. 
+detections%>%
+  group_by(Site, Period)%>%
+  summarise(first_date = min(Date),
+            last_date = max(Date))
+
+#I think what we need to do is define a camera checking period, and see what the operation was during each camera check. Theoretically this should help us catch camera failures later in deployment for each site
+C1<-interval(ymd("2011-10-01"), ymd("2012-09-30"))
+C2<-interval(ymd("2012-10-01"), ymd("2013-09-30"))
+C3<-interval(ymd("2013-10-01"), ymd("2014-10-31")) #Last session in pre goes until end of October
+C4<-interval(ymd("2017-10-01"), ymd("2018-09-30"))
+C5<-interval(ymd("2018-10-01"), ymd("2019-09-30"))
+C6<-interval(ymd("2019-10-01"), ymd("2020-10-31")) #Last session in post goes until end of October
+
+#Assign those detections their camera check
+detections<-detections%>%
+  mutate(camera_check = case_when(Date %within% C1 ~ "C1",
+                                  Date %within% C2 ~ "C2",
+                                  Date %within% C3 ~ "C3",
+                                  Date %within% C4 ~ "C4",
+                                  Date %within% C5 ~ "C5",
+                                  Date %within% C6 ~ "C6"))
+
+#And a quick look at the new first and last dates for individual cameras within their camera check period. See site 1, in pre, during check C2. The camera only goes from october 1st 2012, until august 10th 2013, but doesn't come back online until October 21st 2013. So there are a few months there assuming the camera died and was not back online until checks in October 2013. 
+camop<-detections%>%
+  group_by(Site, Period, camera_check)%>%
+  summarise(first_date = min(Date),
+            last_date = max(Date))
+
+
+
+```
+
+Add in the spatial data to the camera operability file. Its a bit messed up since the data is coming from two different files for the pre and post periods
+```{r}
+#Need to clean up the pre file
+spatial_pre<-spatial_pre%>%
+  dplyr::select(site = SiteNo,  #Change these names
+         UTME = UTM.Coordinates.12U,
+         UTMN = UTM.Coordinates.mE)%>%
+  mutate(site = as.integer(site))%>% #Make sure site is an integer
+  drop_na()%>% #get rid of the nas
+  mutate(treatment = "pre")
+
+#Add a treatment category to the post file and fix site 58
+#rename the spatial site to match
+spatial_post<-spatial_post%>%
+  dplyr::select(site = Site,
+                UTME, UTMN)%>%
+  mutate(treatment = "post")%>%
+  mutate(UTME = case_when(site == 58 ~ 0498381,
+                          site != 58 ~ UTME),
+         UTMN = case_when(site == 58 ~ 6161743,
+                          site != 58 ~ UTMN))
+
+
+#Bind those two together
+spatial<-rbind(spatial_pre, spatial_post)
+
+#Since there are multiple observations per site but the coordinates are the same, lets slice
+spatial<-spatial%>%
+  group_by(treatment, site)%>%
+  slice(1)
+  
+#rename the period/treatement
+camop<-camop%>%
+  rename(treatment = Period,
+         site = Site)
+
+
+
+#Now should be able to merge these based on site
+camop<-merge(camop, spatial, by = c("site", "treatment"))%>%
+  rename(start_date = first_date, end_date = last_date)%>%
+  relocate(site, UTME, UTMN, treatment, camera_check, start_date, end_date)
+
+
+
+#Check number of sites in the final dataframe
+camop%>%
+  group_by(treatment)%>%
+  summarise(n_sites = n_distinct(site))
+
+#Going to clean up our environment a bit, lots going on
+#This will remove everything except detections
+rm(list=setdiff(ls(), c("detections", "camop","input_directory", "output_directory")))
+
+
+```
+
+
+
+Sorting out independenent detections
+```{r}
+
+
+#First thing, lets also make life a bit easier with some cleaning and filtering
+raw_detections<-detections%>%
+  rename(site = Site, 
+         datetime = Date.Time, 
+         species = Species,
+         treatment = Period)%>%
+  dplyr::select(treatment, site, datetime, species)
+
+#Who do we have that was detected?
+unique(raw_detections$species)
+#And how many of each?
+raw_detections%>%
+  group_by(species)%>%
+  summarise(n_obs = n())
+
+#Lets get rid of the weird blanks, everything else stays
+raw_detections<-raw_detections%>%
+  filter(species != "")
+
+n_distinct(raw_detections$species)
+#Also fix a few of the names so that we don't classify the as two species, I think we can fix by just making everyone lowercase
+raw_detections<-raw_detections%>%
+  mutate(species = str_to_lower(species))
+n_distinct(raw_detections$species)
+
+
+#Getting ready for identifying independent detections. Just store things in a temporary dataframe.
+A<-raw_detections%>%
+  arrange(treatment, site, species, datetime)%>%
+  group_by(site)%>%
+  mutate(duration = as.numeric(difftime(datetime,lag(datetime),units = "mins")),
+         year = year(datetime))%>%
+  dplyr::select(site, datetime, species, duration, treatment)%>%
+  relocate(treatment, site, datetime)
+
+# loop that assign group ID   
+A$Event.ID <- 9999
+mins <- 30   # THIS IS THE DETECTION EVENT BREAK-POINT YOU CAN CHANGE
+seq <- as.numeric(paste0(nrow(A),0))
+seq <- round(seq,-(nchar(seq)))
+
+#THIS WILL TAKE A HOT MINUTE TO RUN
+for (i in 2:nrow(A)) {
+  A$Event.ID[i-1]  <- paste0("E",format(seq, scientific = F))
+  if(is.na(A$duration[i]) | abs(A$duration[i]) > mins){
+    seq <- seq + 1 
+  }
+}
+
+# Update the information for the last row
+# group ID  for the last row
+if(A$duration[nrow(A)] < mins| 
+   is.na(A$duration[nrow(A)])){
+  A$Event.ID[nrow(A)] <- A$Event.ID[nrow(A)-1] 
+} else{
+  A$Event.ID[nrow(A)] <- paste0("E",format(seq+1, scientific = F)) 
+}
+
+#I just want to manually check a site to see if that worked proper, looks good to me
+site_one<-A%>%
+  filter(site == 1)
+
+
+#And now, subset the top row for each event to get independent detections
+A<-A%>%
+  group_by(Event.ID) %>%
+  filter(row_number()==1)%>%
+  ungroup(Event.ID)
+
+#How many independent detections for each species in each period?
+ind_detections_summary<-A%>%
+  group_by(treatment, species)%>%
+  summarise(n_dets = n_distinct(Event.ID))
+
+#And rename the file
+independent_detections_30_min<-A
+
+
+```
+
+####################################################################################################################
+Now the covariate stuff, which is always annoying.
+
+
+```{r}
+#It looks like this is the best file to use, prepared by K. Baillie David for her MSc thesis
+#Should just need to format properly and figure out the definitions needed
+covs<-read.csv(file.path(input_directory, "Christina_covariates_prepost_250-5000_KBaillieDavid.csv"), header = TRUE)
+
+# Use grep to find column names containing "AREA"
+columns_to_remove <- grep("AREA", names(covs), value = TRUE)
+# Remove those columns from the dataframe
+covs <- covs[ , !(names(covs) %in% columns_to_remove)]
+
+# Use gsub to remove "PERCENTAGE." from the column names
+names(covs) <- gsub("PERCENTAGE\\.", "", names(covs))
+
+# Convert column names to lowercase
+names(covs) <- tolower(names(covs))
+
+#And lastly, rename the 3d seismic line column, as sometimes having a number first can fuck things up
+covs<-covs%>%
+  rename(seismic_3d = '3dseismicline')
+
+#rearrange some stuff
+covs<-covs%>%
+  relocate(treatment, site, radius)
+
+#And now just make sure all of our sites have covariate files- boom easy peasy
+unique(raw_detections$site) %in% unique(covs$site)
+
+
+
+```
+
+
+Now we can write the four files we need
+```{r}
+
+#Camera location and operability
+write.csv(camop, file.path(output_directory, "christina_lake_camop.csv"),
+          row.names = FALSE)
+
+#Raw detection file
+write.csv(raw_detections, file.path(output_directory, "christina_lake_detections_raw.csv"),
+          row.names = FALSE)
+
+#30 minute independent detection file
+write.csv(independent_detections_30_min, file.path(output_directory, "christina_lake_30min_independent_detections.csv"),
+          row.names = FALSE)
+
+#covariate file
+write.csv(covs, file.path(output_directory, "christina_lake_covariates.csv"),
+          row.names = FALSE)
+
+```
