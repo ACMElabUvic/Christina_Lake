@@ -46,6 +46,7 @@ This folder provides pdf copies of previously published papers using the Christi
  * Barnas et al. 2024 How landscape traits affect boreal mammal responses to anthropogenic disturbance.
  * Burgar et al. 2018. The importance of considering multiple interacting species for conservation of
  * Darlington et al. 2022. Cumulative efects of human footprint, natural features and predation risk best predict seasonal resource selection by white-tailed deer
+ * Ethier et al. 2024 Lethal wolf control elicits change in moose habitat selection in unexpected ways
  * Fisher and Burton 2018. Wildlife winners and losers in an oil sands landscape
  * Fisher and Burton 2020. Spatial structure of reproductive success infers mechanisms of ungulate invasion in Nearctic boreal landscapes
  * Fisher and Ladle 2022. Syntopic species interact with large boreal mammals response to anthropogenic landscape change
